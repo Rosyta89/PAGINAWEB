@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de citas · CEAPSIAL MENTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#FBF4EF; --ivory-2:#F2EDE6; --plum:#3B4447; --plum-soft:#556267;
+    --rose:#F6CAC1; --rose-deep:#C9A59E; --sage:#9DA993; --sage-deep:#717969;
+    --gold:#EFB14A; --white:#FFFFFF; --danger:#B4483F;
+    --shadow:0 20px 50px -20px rgba(59,68,71,0.28); --radius:18px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Inter', sans-serif; background:var(--ivory); color:var(--plum);
+    min-height:100vh; line-height:1.5;
+  }
+  h1,h2{ font-family:'Fraunces', serif; font-weight:500; }
+
+  /* --- LOGIN --- */
+  #login-screen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .login-card{
+    background:var(--white); border-radius:24px; padding:44px 38px; max-width:380px; width:100%;
+    box-shadow:var(--shadow); text-align:center;
+  }
+  .login-card h1{ font-size:1.6rem; margin-bottom:6px; }
+  .login-card p.sub{ color:var(--plum-soft); font-size:0.9rem; margin-bottom:26px; }
+  .field{ margin-bottom:14px; text-align:left; }
+  .field label{ display:block; font-size:0.8rem; color:var(--plum-soft); margin-bottom:6px; font-weight:500; }
+  .field input{
+    width:100%; padding:12px 14px; border-radius:12px; border:1.5px solid var(--ivory-2);
+    background:var(--ivory); color:var(--plum); font-size:0.95rem; font-family:inherit;
+  }
+  .field input:focus{ outline:none; border-color:var(--rose-deep); }
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:13px 24px; border-radius:100px; font-weight:600; font-size:0.95rem;
+    cursor:pointer; border:none; width:100%; transition:transform .2s;
+  }
+  .btn:hover{ transform:translateY(-1px); }
+  .btn-primary{ background:var(--plum); color:var(--ivory); }
+  .btn-approve{ background:var(--sage); color:var(--plum); }
+  .btn-reject{ background:transparent; color:var(--danger); border:1.5px solid var(--danger); }
+  .login-error{ color:var(--danger); font-size:0.85rem; margin-top:12px; display:none; }
+
+  /* --- DASHBOARD --- */
+  #dashboard-screen{ display:none; }
+  header.admin-header{
+    display:flex; align-items:center; justify-content:space-between; padding:20px 28px;
+    background:var(--white); box-shadow:0 2px 12px rgba(59,68,71,0.06);
+  }
+  header.admin-header h1{ font-size:1.15rem; }
+  header.admin-header .who{ font-size:0.82rem; color:var(--plum-soft); }
+  #logout-btn{
+    background:none; border:1.5px solid var(--ivory-2); color:var(--plum-soft);
+    padding:9px 18px; border-radius:100px; font-size:0.85rem; cursor:pointer; font-family:inherit;
+  }
+
+  main{ max-width:820px; margin:0 auto; padding:32px 20px 80px; }
+  .tabs{ display:flex; gap:8px; margin-bottom:24px; }
+  .tab-btn{
+    background:var(--white); border:1.5px solid var(--ivory-2); color:var(--plum-soft);
+    padding:10px 20px; border-radius:100px; font-size:0.88rem; font-weight:500; cursor:pointer; font-family:inherit;
+  }
+  .tab-btn.active{ background:var(--plum); color:var(--ivory); border-color:var(--plum); }
+
+  .empty-state{
+    text-align:center; padding:60px 20px; color:var(--plum-soft);
+  }
+  .empty-state span{ font-size:2rem; display:block; margin-bottom:10px; }
+
+  .booking-card{
+    background:var(--white); border-radius:var(--radius); padding:22px 24px; margin-bottom:14px;
+    box-shadow:0 8px 22px -16px rgba(59,68,71,0.25);
+  }
+  .booking-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
+  .booking-name{ font-family:'Fraunces', serif; font-size:1.15rem; }
+  .booking-when{
+    background:var(--rose); color:var(--plum); font-size:0.82rem; font-weight:600;
+    padding:6px 14px; border-radius:100px; white-space:nowrap;
+  }
+  .booking-details{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-bottom:16px; }
+  .booking-details div{ font-size:0.88rem; }
+  .booking-details b{ display:block; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--sage-deep); margin-bottom:2px; }
+  .booking-actions{ display:flex; gap:10px; }
+  .booking-actions .btn{ width:auto; padding:10px 20px; font-size:0.88rem; }
+  .status-badge{
+    display:inline-block; font-size:0.78rem; font-weight:600; padding:5px 14px; border-radius:100px;
+  }
+  .status-approved{ background:var(--sage); color:var(--plum); }
+  .status-rejected{ background:#F0E0DD; color:var(--danger); }
+
+  @media (max-width:600px){
+    .booking-top{ flex-direction:column; }
+    .booking-actions{ flex-direction:column; }
+    .booking-actions .btn{ width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <h1>CEAPSIAL mente</h1>
+    <p class="sub">Panel de citas — acceso solo para el equipo</p>
+    <div class="field">
+      <label for="login-email">Correo</label>
+      <input type="email" id="login-email" placeholder="tucorreo@ejemplo.com">
+    </div>
+    <div class="field">
+      <label for="login-password">Contraseña</label>
+      <input type="password" id="login-password" placeholder="••••••••">
+    </div>
+    <button type="button" id="login-btn" class="btn btn-primary">Iniciar sesión</button>
+    <p id="login-error" class="login-error">Correo o contraseña incorrectos.</p>
+  </div>
+</div>
+
+<div id="dashboard-screen">
+  <header class="admin-header">
+    <div>
+      <h1>Panel de citas</h1>
+      <p class="who" id="who-label"></p>
+    </div>
+    <button type="button" id="logout-btn">Cerrar sesión</button>
+  </header>
+
+  <main>
+    <div class="tabs">
+      <button type="button" class="tab-btn active" data-tab="pending">Pendientes</button>
+      <button type="button" class="tab-btn" data-tab="approved">Aprobadas</button>
+      <button type="button" class="tab-btn" data-tab="rejected">Rechazadas</button>
+    </div>
+    <div id="list-container"></div>
+  </main>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, collection, query, where, orderBy, getDocs, doc, updateDoc, deleteDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBElns6pJQ0Vj0yEjX9Pt7wiqH3vQL0fOs",
+    authDomain: "psicologia-ae53e.firebaseapp.com",
+    projectId: "psicologia-ae53e",
+    storageBucket: "psicologia-ae53e.firebasestorage.app",
+    messagingSenderId: "701921007659",
+    appId: "1:701921007659:web:f28d93a91ca0e1072b726e"
+  };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const els = {
+    loginScreen: document.getElementById('login-screen'),
+    dashScreen: document.getElementById('dashboard-screen'),
+    loginEmail: document.getElementById('login-email'),
+    loginPassword: document.getElementById('login-password'),
+    loginBtn: document.getElementById('login-btn'),
+    loginError: document.getElementById('login-error'),
+    whoLabel: document.getElementById('who-label'),
+    logoutBtn: document.getElementById('logout-btn'),
+    tabs: document.querySelectorAll('.tab-btn'),
+    listContainer: document.getElementById('list-container'),
+  };
+
+  let currentTab = 'pending';
+
+  els.loginBtn.addEventListener('click', async () => {
+    const email = els.loginEmail.value.trim();
+    const password = els.loginPassword.value;
+    els.loginError.style.display = 'none';
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      els.loginError.style.display = 'block';
+    }
+  });
+
+  els.logoutBtn.addEventListener('click', () => signOut(auth));
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      els.loginScreen.style.display = 'none';
+      els.dashScreen.style.display = 'block';
+      els.whoLabel.textContent = user.email;
+      loadBookings();
+    } else {
+      els.loginScreen.style.display = 'flex';
+      els.dashScreen.style.display = 'none';
+    }
+  });
+
+  els.tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      els.tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentTab = tab.dataset.tab;
+      loadBookings();
+    });
+  });
+
+  function formatDate(dateStr){
+    const [y,m,d] = dateStr.split('-');
+    const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    return `${parseInt(d,10)} de ${meses[parseInt(m,10)-1]} ${y}`;
+  }
+
+  async function loadBookings(){
+    els.listContainer.innerHTML = '<p style="text-align:center; color:var(--plum-soft); padding:40px 0;">Cargando...</p>';
+    const q = query(collection(db, 'bookings'), where('status','==', currentTab), orderBy('createdAt','desc'));
+    let snap;
+    try {
+      snap = await getDocs(q);
+    } catch (err) {
+      els.listContainer.innerHTML = `<p style="text-align:center; color:var(--danger); padding:40px 0;">Error al cargar: ${err.message}</p>`;
+      return;
+    }
+
+    if (snap.empty) {
+      const labels = { pending:'pendientes', approved:'aprobadas', rejected:'rechazadas' };
+      els.listContainer.innerHTML = `<div class="empty-state"><span>📭</span><p>No hay citas ${labels[currentTab]} por ahora.</p></div>`;
+      return;
+    }
+
+    els.listContainer.innerHTML = '';
+    snap.forEach(docSnap => {
+      const b = docSnap.data();
+      const id = docSnap.id;
+      const card = document.createElement('div');
+      card.className = 'booking-card';
+
+      let actionsHtml = '';
+      if (currentTab === 'pending') {
+        actionsHtml = `
+          <div class="booking-actions">
+            <button type="button" class="btn btn-approve" data-action="approve" data-id="${id}">Aprobar</button>
+            <button type="button" class="btn btn-reject" data-action="reject" data-id="${id}" data-date="${b.date}" data-time="${b.time}">Rechazar</button>
+          </div>`;
+      } else {
+        const label = currentTab === 'approved' ? 'Aprobada' : 'Rechazada';
+        const cls = currentTab === 'approved' ? 'status-approved' : 'status-rejected';
+        actionsHtml = `<span class="status-badge ${cls}">${label}</span>`;
+      }
+
+      card.innerHTML = `
+        <div class="booking-top">
+          <span class="booking-name">${b.name || 'Sin nombre'}</span>
+          <span class="booking-when">${formatDate(b.date)} · ${b.time}</span>
+        </div>
+        <div class="booking-details">
+          <div><b>Modalidad</b>${b.modality || '—'}</div>
+          <div><b>Teléfono</b>${b.phone || '—'}</div>
+          <div><b>Correo</b>${b.email || '—'}</div>
+        </div>
+        ${actionsHtml}
+      `;
+      els.listContainer.appendChild(card);
+    });
+
+    els.listContainer.querySelectorAll('[data-action="approve"]').forEach(btn => {
+      btn.addEventListener('click', () => approveBooking(btn.dataset.id));
+    });
+    els.listContainer.querySelectorAll('[data-action="reject"]').forEach(btn => {
+      btn.addEventListener('click', () => rejectBooking(btn.dataset.id, btn.dataset.date, btn.dataset.time));
+    });
+  }
+
+  async function approveBooking(id){
+    await updateDoc(doc(db, 'bookings', id), { status: 'approved' });
+    loadBookings();
+  }
+
+  async function rejectBooking(id, date, time){
+    await updateDoc(doc(db, 'bookings', id), { status: 'rejected' });
+    // Liberar el horario para que otras personas puedan solicitarlo
+    const q = query(collection(db, 'busy_slots'), where('date','==',date), where('time','==',time));
+    const snap = await getDocs(q);
+    for (const slotDoc of snap.docs) {
+      await deleteDoc(doc(db, 'busy_slots', slotDoc.id));
+    }
+    loadBookings();
+  }
+</script>
+
+</body>
+</html>
